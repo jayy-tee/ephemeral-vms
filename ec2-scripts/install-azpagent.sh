@@ -6,6 +6,7 @@ AZP_TOKEN_B64="`echo -n $AZP_TOKEN: | base64`"
 AZP_AGENT_INSTALLDIR="/home/azpagent"
 AZP_AGENT_POOL="MyApp-Production"
 AZP_AGENT_USER="azpagent"
+AZP_PROJECT_NAME="Spikes"
 
 EC2_INSTANCE_ID="`wget -q -O - http://169.254.169.254/latest/meta-data/instance-id`"
 
@@ -36,11 +37,11 @@ wget -O vsts-agent.tar.gz $DOWNLOAD_URL
 tar -zxf vsts-agent.tar.gz
 
 ./config.sh \
-        --unattended \
+        --environment \
+        --projectname $AZP_PROJECT_NAME \
         --url $AZP_URL \
         --auth pat --token $AZP_TOKEN \
-        --pool $AZP_AGENT_POOL \
-        --agent $EC2_INSTANCE_ID \
-        --acceptTeeEula
+        --environmentname $AZP_AGENT_POOL \
+        --agent $EC2_INSTANCE_ID
 
 rm $AZP_AGENT_INSTALLDIR/vsts-agent*.tar.gz
