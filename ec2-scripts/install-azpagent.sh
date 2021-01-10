@@ -1,14 +1,20 @@
 #!/bin/bash
 
-AZP_URL="https://dev.azure.com/jayytee"
-AZP_TOKEN="ap5ocillfloerwz6e6ondwtrsldyt5r5nhf4trfgyg7mvxtzosbq"
+echo "Gathering EC2 instance data..."
+EC2_INSTANCE_ID="`wget -q -O - http://169.254.169.254/latest/meta-data/instance-id`"
+EC2_INSTANCE_REGION="`wget -q -O - http://169.254.169.254/latest/dynamic/instance-identity/document | python extract-instance-region.py`"
+export AWS_DEFAULT_REGION=$EC2_INSTANCE_REGION
+
+echo "Setting AWS Settings"
+AZP_URL="`aws ssm get-parameter --name azdevops.url --output text | cut -f7`"
+AZP_TOKEN="`aws ssm get-parameter --with-decryption --name azdevops.agentregistration.token --output text | cut -f7`"
 AZP_TOKEN_B64="`echo -n $AZP_TOKEN: | base64`"
 AZP_AGENT_INSTALLDIR="/home/azpagent"
-AZP_AGENT_POOL="MyApp-Production"
+AZP_AGENT_POOL="`aws ec2 describe-tags --filters "Name=resource-id,Values=$EC2_INSTANCE_ID" "Name=key,Values=AzDevOps-Environment" --output=text | cut -f5`"
 AZP_AGENT_USER="azpagent"
-AZP_PROJECT_NAME="Spikes"
-
-EC2_INSTANCE_ID="`wget -q -O - http://169.254.169.254/latest/meta-data/instance-id`"
+AZP_PROJECT_NAME="`aws ec2 describe-tags --filters "Name=resource-id,Values=$EC2_INSTANCE_ID" "Name=key,Values=AzDevOps-Project" --output=text | cut -f5`"
+AZP_RESOURCE_TAGS="`aws ec2 describe-tags --filters "Name=resource-id,Values=$EC2_INSTANCE_ID" "Name=key,Values=AzDevOps-Environment-ResourceTags" --output=text | cut -f5`"
+echo "Detected Azure DevOps Environment Resource Tags $AZP_RESOURCE_TAGS"
 
 echo "Downloading Azure Pipelines Agent..."
 case `uname -m` in
@@ -33,15 +39,27 @@ if [[ ! -d "$AZP_AGENT_INSTALLDIR" ]]; then
 fi
 
 cd $AZP_AGENT_INSTALLDIR
-wget -O vsts-agent.tar.gz $DOWNLOAD_URL
+wget -q -O vsts-agent.tar.gz $DOWNLOAD_URL
 tar -zxf vsts-agent.tar.gz
 
-./config.sh \
-        --environment \
-        --projectname $AZP_PROJECT_NAME \
-        --url $AZP_URL \
-        --auth pat --token $AZP_TOKEN \
-        --environmentname $AZP_AGENT_POOL \
-        --agent $EC2_INSTANCE_ID
+if [[ ! -z "$AZP_RESOURCE_TAGS" ]]; then
+        ./config.sh \
+                --environment \
+                --projectname $AZP_PROJECT_NAME \
+                --url $AZP_URL \
+                --auth pat --token $AZP_TOKEN \
+                --environmentname $AZP_AGENT_POOL \
+                --agent $EC2_INSTANCE_ID \
+                --addvirtualmachineresourcetags \
+                --virtualmachineresourcetags $AZP_RESOURCE_TAGS
+else
+        ./config.sh \
+                --environment \
+                --projectname $AZP_PROJECT_NAME \
+                --url $AZP_URL \
+                --auth pat --token $AZP_TOKEN \
+                --environmentname $AZP_AGENT_POOL \
+                --agent $EC2_INSTANCE_ID
+fi
 
 rm $AZP_AGENT_INSTALLDIR/vsts-agent*.tar.gz
