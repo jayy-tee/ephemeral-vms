@@ -1,7 +1,27 @@
 import boto3
 import constant
+import json
 from azdevops_client import AzDevOpsClient
-from agent_manager import AgentManager
+from agent_manager import Agent, AgentManager
+
+class SsmClient:
+    def __init__(self):
+        self.client = boto3.client('ssm')
+
+    def get_parameter(self, parameter, decrypt=False):
+        response = self.client.get_parameter(Name=parameter, WithDecryption=decrypt)
+        
+        return response['Parameter']['Value']
+
+ssm_client = SsmClient()
+dynamodb = boto3.resource('dynamodb')
+table = dynamodb.Table('azdevops-ephemeral-agents')
+agent_manager = AgentManager(table)
+
+azdevops_org_url = ssm_client.get_parameter('azdevops.url')
+azdevops_pat = ssm_client.get_parameter('azdevops.agentregistration.token', True)
+azdevops_client = AzDevOpsClient(azdevops_pat, azdevops_org_url, None)
+
 
 def get_ssm_parameter(parameter, decrypt=False):
     client = boto3.client('ssm')
@@ -28,30 +48,33 @@ def get_instance_devopsproject(instance_tags):
     if (len(projects) > 0):
         return projects[0]['Value']
 
-def get_azdevops_tags_from_instance(instance_id: str):
-    raise NotImplementedError
+def get_azdevops_data_from_instance(instance_id: str):
+    tags = get_instance_tags(instance_id)
+    return {
+        'Environment': get_instance_environment_tag(tags),
+        'Project': get_instance_devopsproject(tags)
+    }
 
-def register_instance(instance_id: int):
-    raise NotImplementedError
+def register_instance(instance_id: str):
+    instance_data = get_azdevops_data_from_instance(instance_id)
+    azdevops_client.set_project(instance_data['Project'])
 
-class SsmClient:
-    def __init__(self):
-        self.client = boto3.client('ssm')
+    environment = azdevops_client.get_environment(instance_data['Environment'])
+    agent = Agent(instance_id, instance_data['Project'], instance_data['Environment'], environment['id'])
 
-    def get_parameter(self, parameter, decrypt=False):
-        response = self.client.get_parameter(Name=parameter, WithDecryption=decrypt)
-        
-        return response['Parameter']['Value']
+    agent_manager.add_agent(agent)
+
+def remove_instance(instance_id: str):
+    agent = agent_manager.get_agent_by_id(instance_id)
+
+    if (agent == None):
+        return
+    
+    azdevops_client.set_project(agent.azdevops_project_name)
+    azdevops_client.delete_virtualmachine_from_environment(agent.azdevops_environment_id, agent.instance_id)
+    agent_manager.remove_agent_by_id(agent.instance_id)
 
 def lambda_handler(event, context):
-    ssm_client = SsmClient()
-    dynamodb = boto3.resource('dynamodb')
-    table = dynamodb.Table('azdevops-ephemeral-agents')
-
-    azdevops_org_url = ssm_client.get_parameter('azdevops.url')
-    azdevops_pat = ssm_client.get_parameter('azdevops.agentregistration.token', True)
-    azdevops_client = AzDevOpsClient(azdevops_pat, azdevops_org_url, None)
-
     for record in event['Records']:
         message = json.loads(record['Sns']['Message'])
         instance_id = message['EC2InstanceId']
@@ -59,7 +82,6 @@ def lambda_handler(event, context):
         if (message['Event'] == 'autoscaling:EC2_INSTANCE_LAUNCH'):
             register_instance(instance_id)
         elif (message['Event'] == 'autoscaling:EC2_INSTANCE_TERMINATE'):
-            agent_manager = AgentManager(table, azdevops_client)
-
-    
-    
+            remove_instance(instance_id)
+        else:
+            pass

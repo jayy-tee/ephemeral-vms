@@ -4,7 +4,7 @@ import constant
 import base64
 import requests
 from azdevops_client import AzDevOpsClient
-from agent_manager import AgentManager
+from agent_manager import Agent, AgentManager
 
 def get_ssm_parameter(parameter, decrypt=False):
     client = boto3.client('ssm')
@@ -21,14 +21,17 @@ if __name__ == '__main__':
     azdevops_pat = get_ssm_parameter('azdevops.agentregistration.token', True)
 
     azdevops_client = AzDevOpsClient(azdevops_pat, 'jayytee', project_name)
-    agent_manager = AgentManager(table, azdevops_client)
+    agent_manager = AgentManager(table)
     the_environment = 'MyApp-Production'
 
-    agent_manager.add_agent('i-123098u123', azdevops_project_url, the_environment)
-    agent_manager.add_agent('i-123098u124', azdevops_project_url, the_environment)
-    agent_manager.add_agent('i-123098u125', azdevops_project_url, the_environment)
-    agent_manager.remove_agent('i-123098u125')
+    agent_manager.add_agent(Agent('i-123098u124', project_name, the_environment, 4))
+    agent_manager.add_agent(Agent('i-123098u125', project_name, the_environment, 4))
 
-    agent_manager.remove_agent('i-055d39d6b8875ae7d')
+
+    # agent_manager.add_agent('i-123098u124', azdevops_project_url, the_environment)
+    # agent_manager.add_agent('i-123098u125', azdevops_project_url, the_environment)
+    # agent_manager.remove_agent('i-123098u125')
+
+    # agent_manager.remove_agent('i-055d39d6b8875ae7d')
 
 
