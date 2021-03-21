@@ -1,6 +1,7 @@
 import boto3
 import constant
 import json
+import os
 from azdevops_client import AzDevOpsClient
 from agent_manager import Agent, AgentManager
 
@@ -13,21 +14,15 @@ class SsmClient:
         
         return response['Parameter']['Value']
 
+table_name = os.environ['AGENT_TABLE_NAME'] or 'azdevops-ephemeral-agents'
 ssm_client = SsmClient()
 dynamodb = boto3.resource('dynamodb')
-table = dynamodb.Table('azdevops-ephemeral-agents')
+table = dynamodb.Table(table_name)
 agent_manager = AgentManager(table)
 
 azdevops_org_url = ssm_client.get_parameter('azdevops.url')
 azdevops_pat = ssm_client.get_parameter('azdevops.agentregistration.token', True)
 azdevops_client = AzDevOpsClient(azdevops_pat, azdevops_org_url, None)
-
-
-def get_ssm_parameter(parameter, decrypt=False):
-    client = boto3.client('ssm')
-    response = client.get_parameter(Name=parameter, WithDecryption=decrypt)
-    
-    return response['Parameter']['Value']
 
 def get_instance_tags(instance_id):
     ec2_client = boto3.client('ec2')
