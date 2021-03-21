@@ -20,8 +20,8 @@ resource "aws_s3_bucket_public_access_block" "lambda_private_access" {
 resource "aws_s3_bucket_object" "lambda_deployment" {
   bucket = aws_s3_bucket.lambda.id
   key    = "deployment-package.zip"
-  source = "../../lambda/deployment-package.zip"
-  etag   = filemd5("../../lambda/deployment-package.zip")
+  source = "../deployment-package.zip"
+  etag   = filemd5("../deployment-package.zip")
 }
 
 resource "aws_lambda_function" "agent_lambda" {
@@ -31,7 +31,7 @@ resource "aws_lambda_function" "agent_lambda" {
   handler          = "autoscaling_handler.lambda_handler"
   s3_bucket        = aws_s3_bucket.lambda.id
   s3_key           = aws_s3_bucket_object.lambda_deployment.key
-  source_code_hash = filebase64sha256("../../lambda/deployment-package.zip")
+  source_code_hash = filebase64sha256("../deployment-package.zip")
   timeout          = 15
 
   environment {

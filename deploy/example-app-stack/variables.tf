@@ -48,7 +48,7 @@ variable "azdevops_pat" {
   sensitive = true
 }
 
-variable "notification_topic_name" {
+variable "notification_topic_arn" {
   type        = string
-  description = "Name of SNS Topic to be used for Autoscaling Notifications"
+  description = "ARN of SNS Topic to be used for Autoscaling Notifications"
 }

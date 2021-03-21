@@ -30,7 +30,7 @@ locals {
 }
 
 module "vpc" {
-  source      = "./network-stack"
+  source      = "./network"
   stack_name  = var.stack_name
   environment = var.environment
   vpc_cidr    = var.vpc_cidr

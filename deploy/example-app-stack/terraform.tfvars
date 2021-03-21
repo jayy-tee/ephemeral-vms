@@ -1,0 +1,7 @@
+region                    = "ap-southeast-2"
+vpc_cidr                  = "10.1.0.0/16"
+environment               = "dev"
+stack_name                = "ephemeralagents"
+ec2_iam_instance_profile  = "myapp-ec2-instances"
+azdevops_project_name     = "Spikes"
+azdevops_environment_name = "MyApp-Production"
