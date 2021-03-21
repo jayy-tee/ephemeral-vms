@@ -57,4 +57,4 @@ Deploy:
 [you@yourhost example-app-stack]$ terraform apply
 ```
 
-Once the stack is deployed, you should be able to add instances to the Autoscaling Group and have them appear in the specified Azure DevOps Environment. Likewise, then the instances are scaled down, they should be automatically removed from Azure DevOps.
+Once the stack is deployed, you should be able to add instances to the Autoscaling Group and have them appear in the specified Azure DevOps Environment. Likewise, when the instances are scaled down, they should be automatically removed from Azure DevOps.

@@ -11,7 +11,7 @@ This repo provides a solution addressing a scenario where a person/team:
 In the above scenario, the virtual machine resources are considered ephemeral, with EC2 instances managed using Autoscaling Groups in AWS.
 
 ## Deployment
-A functional deployment is offered to demonstrate the solution. See [deployment.md](deploy/readme.md) for full steps.
+A functional deployment is offered to demonstrate the solution. See [deploy/readme.md](deploy/readme.md) for full steps.
 
 ## Solution overview
 ### Components
@@ -21,6 +21,9 @@ A functional deployment is offered to demonstrate the solution. See [deployment.
 * S3
 * SNS
 * SSM
+
+### Required Software
+* Python 3.8
 * Terraform
 
 ### Agent/VM registration
