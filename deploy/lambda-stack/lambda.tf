@@ -53,7 +53,7 @@ resource "aws_cloudwatch_log_group" "lambda_logs" {
 }
 
 resource "aws_iam_role" "iam_for_lambda" {
-  name               = "${var.stack_name}-agent-degistration-lambda-role"
+  name               = "${var.stack_name}-agent-registration-lambda-role"
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -122,7 +122,7 @@ EOF
 
 # See also the following AWS managed policy: AWSLambdaBasicExecutionRole
 resource "aws_iam_policy" "lambda_logging" {
-  name        = "${var.stack_name}-agent-degistration-lambda"
+  name        = "${var.stack_name}-agent-registration-lambda"
   path        = "/"
   description = "IAM policy for logging from a lambda"
 
