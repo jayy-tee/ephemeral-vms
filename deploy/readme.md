@@ -37,7 +37,7 @@ Deploy:
 [you@yourhost lambda-stack]$ terraform apply
 ```
 
-The output of the `lambda-stack` module can be captured and included for inclusion in `example-app-stack`:
+The output of the `lambda-stack` module can be captured for inclusion in `example-app-stack`:
 ```
 [you@yourhost lambda-stack]$ terraform output > ../example-app-stack/deps.auto.tfvars
 ```
