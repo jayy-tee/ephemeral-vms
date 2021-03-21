@@ -1,3 +1,7 @@
 AGENTPOOL_TAGNAME = 'AzDevOps-AgentPool-Id'
 AZP_PROJECT = 'AzDevOps-Project'
 AZP_ENVIRONMENT_TAG = 'AzDevOps-Environment'
+AZP_ENVIRONMENT_ID = 'AzDevOps-Environment-Id'
+AZP_ENVIRONMENT_URL = 'AzDevops-Environment-Url'
+AZP_ENVIRONMENT_RESOURCE_URL = 'AzDevops-Environment-Resource-Url'
+TABLE_PRIMARY_KEY = 'Instance-Id'
