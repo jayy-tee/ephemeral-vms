@@ -36,6 +36,6 @@ resource "aws_autoscaling_notification" "asg_notifications" {
     "autoscaling:EC2_INSTANCE_TERMINATE",
   ]
 
-  topic_arn = aws_sns_topic.autoscale_notifications.arn
+  topic_arn = var.notification_topic_arn
 }
 
