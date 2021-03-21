@@ -9,7 +9,7 @@ You will need to create a Personal Access Token (PAT) with the following permiss
 * Build (Read)
 * Deployment Groups (Read & manage)
 * Environment (Read & manage)
-* Task Groups (Read, create * manage)
+* Task Groups (Read, create & manage)
 
 ### Build/prepare dependent resources for the Lambda stack
 You will need to first build (prepare a zip file) for the Lambda function and ec2-scripts folder. 
